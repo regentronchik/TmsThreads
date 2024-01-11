@@ -8,25 +8,22 @@
 import UIKit
 
 class ViewController: UIViewController {
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         let account = BankAccount()
-        let queue = DispatchQueue(label: "BankOperations", attributes: .concurrent)
-        for i in 1...10 {
-            queue.async {
+        for _ in 1...10 {
+            let thread1 = Thread {
                 account.deposit(amount: 100)
-                print("Thread \(i) - Deposit: balance = \(account.balance)")
+                print("Thread 1 - Deposit: balance = \(account.balance)")
             }
-
-            queue.async{
+            let thread2 = Thread {
                 account.withdraw(amount: 50)
-                print("Thread \(i) - Withdraw: balance = \(account.balance)")
+                print("Thread 2 - Withdraw: balance = \(account.balance)")
             }
+            thread1.start()
+            thread2.start()
         }
-        queue.sync(flags: .barrier) {}
-        print("Final balance: \(account.balance)")
     }
 }
-
