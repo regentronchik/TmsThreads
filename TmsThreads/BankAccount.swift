@@ -9,19 +9,21 @@ import Foundation
 
 class BankAccount {
     var balance: Int = 0
-    let lock = NSLock()
-
+    let concurrentQueue = DispatchQueue(label: "com.homework.bankAccount", attributes: .concurrent)
+    
     func deposit(amount: Int) {
-        lock.lock()
-        balance += amount
-        lock.unlock()
-    }
-
-    func withdraw(amount: Int) {
-        lock.lock()
-        if balance >= amount {
-            balance -= amount
+        concurrentQueue.async(flags: .barrier) {
+            self.balance += amount
         }
-        lock.unlock()
+    }
+    
+    func withdraw(amount: Int) {
+        concurrentQueue.async(flags: .barrier) {
+            if self.balance >= amount {
+                self.balance -= amount
+            } else {
+                print("Недостаточно средств")
+            }
+        }
     }
 }

@@ -13,17 +13,18 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         
         let account = BankAccount()
-        for _ in 1...10 {
-            let thread1 = Thread {
+        let queue = DispatchQueue(label: "com.homework.BankOperations", attributes: .concurrent)
+        
+        DispatchQueue.concurrentPerform(iterations: 10) { i in
+            if i % 2 == 0 {
                 account.deposit(amount: 100)
-                print("Thread 1 - Deposit: balance = \(account.balance)")
-            }
-            let thread2 = Thread {
+                print("Пополнение.Баланс счета: \(account.balance)")
+            } else {
                 account.withdraw(amount: 50)
-                print("Thread 2 - Withdraw: balance = \(account.balance)")
+                print("Снятие.Баланс счета: \(account.balance)")
             }
-            thread1.start()
-            thread2.start()
         }
+        queue.sync(flags: .barrier) {}
+        print("Финальный баланс: \(account.balance)")
     }
 }
